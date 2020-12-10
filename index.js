@@ -19,8 +19,11 @@ const checkStock = async () => {
     }
 
     if (count === 120) {
-        slack.healthcheck();
         count = 0;
+    }
+
+    if (count === 0) {
+        slack.healthcheck();
     }
 
     count++;
