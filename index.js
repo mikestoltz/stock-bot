@@ -10,7 +10,11 @@ let count = 0;
 
 const checkStock = async () => {
     for (const product of productList) {
-        const { data } = await axios.get(product.url, { headers: scrapers[product.site].headers });
+        const headers = typeof scrapers[product.site].headers === 'function'
+            ? scrapers[product.site].headers()
+            : scrapers[product.site].headers;
+
+        const { data } = await axios.get(product.url, { headers });
         const instock = scrapers[product.site].stock(data);
 
         if (instock) {
