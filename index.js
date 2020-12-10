@@ -1,6 +1,6 @@
 'use strict';
 
-const fetch = require('node-fetch');
+const axios = require('axios');
 
 const productList = require('./lib/products');
 const scrapers = require('./lib/scrapers');
@@ -9,12 +9,11 @@ const slack = require('./lib/slack');
 let count = 0;
 
 const checkStock = async () => {
-    for(const product of productList) {
-        const response = await fetch(product.url, { headers: scrapers[product.site].headers });
-        const source = await response.text();
-        const instock = scrapers[product.site].stock(source);
+    for (const product of productList) {
+        const { data } = await axios.get(product.url, { headers: scrapers[product.site].headers });
+        const instock = scrapers[product.site].stock(data);
 
-        if(instock) {
+        if (instock) {
             await slack.notify(product);
         }
     }
