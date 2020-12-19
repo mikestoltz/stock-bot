@@ -15,7 +15,7 @@ const checkStock = async () => {
             const headers = typeof scrapers[product.site].headers === 'function'
                 ? scrapers[product.site].headers()
                 : scrapers[product.site].headers;
-
+            console.log(`requesting ${product.title} from ${product.site}`)
             const { data } = await axios.get(product.url, { headers });
             const instock = scrapers[product.site].stock(data);
 
