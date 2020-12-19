@@ -1,6 +1,7 @@
 'use strict';
 
 const axios = require('axios');
+const http = require('http');
 
 const productList = require('./lib/products');
 const scrapers = require('./lib/scrapers');
@@ -10,15 +11,19 @@ let count = 0;
 
 const checkStock = async () => {
     for (const product of productList) {
-        const headers = typeof scrapers[product.site].headers === 'function'
-            ? scrapers[product.site].headers()
-            : scrapers[product.site].headers;
+        try {
+            const headers = typeof scrapers[product.site].headers === 'function'
+                ? scrapers[product.site].headers()
+                : scrapers[product.site].headers;
 
-        const { data } = await axios.get(product.url, { headers });
-        const instock = scrapers[product.site].stock(data);
+            const { data } = await axios.get(product.url, { headers });
+            const instock = scrapers[product.site].stock(data);
 
-        if (instock) {
-            await slack.notify(product);
+            if (instock) {
+                await slack.notify(product);
+            }
+        } catch(err) {
+            console.log(err)
         }
     }
 
@@ -36,3 +41,11 @@ const checkStock = async () => {
 checkStock();
 // Run every 30s
 setInterval(checkStock, 30000);
+
+const requestListener = function (req, res) {
+  res.writeHead(200);
+  res.end();
+}
+
+const server = http.createServer(requestListener);
+server.listen(8080);
