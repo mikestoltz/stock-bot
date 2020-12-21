@@ -7,6 +7,7 @@ const productList = require('./lib/products');
 const scrapers = require('./lib/scrapers');
 const slack = require('./lib/slack');
 
+const stockStatuses = {};
 let count = 0;
 
 const checkStock = async () => {
@@ -15,13 +16,15 @@ const checkStock = async () => {
             const headers = typeof scrapers[product.site].headers === 'function'
                 ? scrapers[product.site].headers()
                 : scrapers[product.site].headers;
-            console.log(`requesting ${product.title} from ${product.site}`)
+
             const { data } = await axios.get(product.url, { headers });
             const instock = scrapers[product.site].stock(data);
 
-            if (instock) {
-                await slack.notify(product);
+            if (stockStatuses[product.url] !== instock) {
+                await slack.notify(product, instock);
             }
+
+            stockStatuses[product.url] = instock;
         } catch(err) {
             console.log(err)
         }
