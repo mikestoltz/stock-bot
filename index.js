@@ -20,6 +20,10 @@ const checkStock = async () => {
             const { data } = await axios.get(product.url, { headers });
             const instock = scrapers[product.site].stock(data);
 
+            if (stockStatuses[product.url] === undefined) {
+                stockStatuses[product.url] = false;
+            }
+
             if (stockStatuses[product.url] !== instock) {
                 await slack.notify(product, instock);
             }
